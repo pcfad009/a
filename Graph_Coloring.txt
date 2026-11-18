@@ -1,0 +1,17 @@
+graph = {0:[1,2], 1:[0,2], 2:[0,1,3], 3:[2]}
+colors = ['Red', 'Green', 'Blue']
+answer = {}
+vertices = list(graph)
+
+def solve(i):
+    if i == len(vertices):
+        return True
+    node = vertices[i]
+    for color in colors:
+        if all(answer.get(neighbor) != color for neighbor in graph[node]):
+            answer[node] = color        # try
+            if solve(i+1): return True
+            del answer[node]           # undo
+    return False
+
+print('Solution:', answer if solve(0) else 'Not possible')

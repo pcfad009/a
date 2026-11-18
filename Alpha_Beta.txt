@@ -1,0 +1,41 @@
+# Same tic-tac-toe as Practical 2, but with alpha-beta pruning.
+board = ['X', 'O', 'X',
+         ' ', 'O', ' ',
+         ' ', 'X', ' ']
+wins = [(0,1,2),(3,4,5),(6,7,8),(0,3,6),
+        (1,4,7),(2,5,8),(0,4,8),(2,4,6)]
+
+def result():
+    for a, b, c in wins:
+        if board[a] != ' ' and board[a] == board[b] == board[c]:
+            return 1 if board[a] == 'O' else -1
+    return 0 if ' ' not in board else None
+
+def search(player, alpha, beta):
+    ans = result()
+    if ans is not None: return ans
+    best = -2 if player == 'O' else 2
+    for i in range(9):
+        if board[i] == ' ':
+            board[i] = player               # try
+            score = search('X' if player == 'O' else 'O', alpha, beta)
+            board[i] = ' '                  # undo
+            if player == 'O':
+                best = max(best, score)
+                alpha = max(alpha, best)
+            else:
+                best = min(best, score)
+                beta = min(beta, best)
+            if alpha >= beta: break        # PRUNE
+    return best
+
+best_score, best_move = -2, None
+for i in range(9):
+    if board[i] == ' ':
+        board[i] = 'O'
+        score = search('X', -2, 2)
+        board[i] = ' '
+        if score > best_score:
+            best_score, best_move = score, i
+print('Best computer move (1-9):', best_move+1)
+print('Expected outcome (-1 loss, 0 draw, 1 win):', best_score)

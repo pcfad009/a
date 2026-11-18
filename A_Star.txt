@@ -1,0 +1,48 @@
+# EXTRA: A* for the 8-puzzle (syllabus practical 1).
+# A state uses 0 for the empty tile.
+from heapq import heappush, heappop
+
+start = (1, 2, 3, 4, 0, 6, 7, 5, 8)
+goal  = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+
+def h(state):
+    # Manhattan distance: number of horizontal/vertical steps to goal.
+    return sum(abs(i//3 - (v-1)//3) + abs(i%3 - (v-1)%3)
+               for i, v in enumerate(state) if v != 0)
+
+def neighbors(state):
+    zero = state.index(0)
+    r, c = divmod(zero, 3)
+    for dr, dc in [(1,0), (-1,0), (0,1), (0,-1)]:
+        nr, nc = r+dr, c+dc
+        if 0 <= nr < 3 and 0 <= nc < 3:
+            j = nr*3 + nc
+            nxt = list(state)
+            nxt[zero], nxt[j] = nxt[j], nxt[zero]
+            yield tuple(nxt)
+
+queue = [(h(start), 0, start)]  # priority: f = g + h
+best = {start: 0}
+parent = {start: None}
+while queue:
+    f, g, state = heappop(queue)
+    if g != best[state]:
+        continue
+    if state == goal:
+        path = []
+        while state is not None:
+            path.append(state)
+            state = parent[state]
+        path.reverse()
+        print('Moves:', len(path)-1)
+        for p in path:
+            print(*p[:3], '\n', *p[3:6], '\n', *p[6:], '\n')
+        break
+    for nxt in neighbors(state):
+        ng = g + 1
+        if ng < best.get(nxt, float('inf')):
+            best[nxt] = ng
+            parent[nxt] = state
+            heappush(queue, (ng+h(nxt), ng, nxt))
+else:
+    print('No solution')

@@ -1,0 +1,41 @@
+# KNN on iris.csv; if the file isn't available, built-in Iris works.
+from pathlib import Path
+import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+
+FILE = 'iris.csv'          # CHANGE if examiner gives a different CSV
+TARGET = 'species'         # CHANGE target column; use None to use last column
+if Path(FILE).exists():
+    df = pd.read_csv(FILE).dropna()
+    target = TARGET if TARGET in df.columns else df.columns[-1]
+    X = pd.get_dummies(df.drop(columns=[target]).drop(columns=['Id', 'id'], errors='ignore'))
+    y = df[target]
+else:
+    X, y = load_iris(return_X_y=True)  # built-in Iris fallback
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+model = KNeighborsClassifier(n_neighbors=5)
+model.fit(X_train, y_train)
+pred = model.predict(X_test)
+labels = sorted(set(y_test) | set(pred))
+cm = confusion_matrix(y_test, pred, labels=labels)
+print('Confusion Matrix:\n', cm)
+print('Accuracy:', accuracy_score(y_test, pred))
+print('Error rate:', 1 - accuracy_score(y_test, pred))
+print('Precision (macro):', precision_score(y_test, pred, average='macro', zero_division=0))
+print('Recall (macro):', recall_score(y_test, pred, average='macro', zero_division=0))
+# Iris has THREE classes. Show TP/FP/TN/FN per class (one-vs-rest).
+for i, name in enumerate(labels):
+    tp = cm[i, i]
+    fp = cm[:, i].sum() - tp
+    fn = cm[i, :].sum() - tp
+    tn = cm.sum() - tp - fp - fn
+    print('Class:', name, '| TP:', tp, 'FP:', fp, 'TN:', tn, 'FN:', fn)

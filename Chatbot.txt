@@ -1,0 +1,16 @@
+print('ShopBot: Hello! Type bye to exit.')
+while True:
+    msg = input('You: ').lower()
+    if 'bye' in msg:
+        print('ShopBot: Goodbye!'); break
+    elif 'hello' in msg or 'hi' in msg:
+        reply = 'Hello! How can I help?'
+    elif 'price' in msg:
+        reply = 'Tell me which product you want.'
+    elif 'time' in msg or 'open' in msg:
+        reply = 'Our store opens at 9 AM.'
+    elif 'return' in msg:
+        reply = 'Please provide your order number.'
+    else:
+        reply = 'Sorry, please ask about prices, timing or returns.'
+    print('ShopBot:', reply)

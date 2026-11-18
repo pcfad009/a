@@ -1,0 +1,24 @@
+# PCA: reduce many features to 2 and draw the result.
+from pathlib import Path
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+FILE = 'data.csv'   # If examiner supplies a CSV, change this filename
+if Path(FILE).exists():
+    df = pd.read_csv(FILE)
+    df = df.select_dtypes(include='number').dropna()
+    X = df.values
+    colors = None
+else:
+    iris = load_iris()
+    X = iris.data
+    colors = iris.target
+X = StandardScaler().fit_transform(X)
+new_X = PCA(n_components=2).fit_transform(X)
+plt.scatter(new_X[:, 0], new_X[:, 1], c=colors)
+plt.xlabel('PC1'); plt.ylabel('PC2')
+plt.title('PCA'); plt.show()
+print('Original shape:', X.shape, 'New shape:', new_X.shape)

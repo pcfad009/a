@@ -1,0 +1,59 @@
+# PRACTICAL: 8 required preprocessing operations. Works with any CSV.
+import pandas as pd
+import numpy as np
+from sklearn.datasets import load_iris
+
+FILE = 'data.csv'   # CHANGE THIS to the examiner's CSV filename
+# No CSV? Use built-in Iris data for practice.
+from pathlib import Path
+if Path(FILE).exists():
+    df = pd.read_csv(FILE)
+    source = FILE  # Say the actual website URL if supplied by examiner
+else:
+    df = load_iris(as_frame=True).frame.copy()
+    source = 'https://archive.ics.uci.edu/dataset/53/iris'
+
+print('Dataset source:', source)
+print('Rows and columns:', df.shape)
+print('First five rows:\n', df.head())
+print('Statistics:\n', df.describe(include='all'))
+print('Types:\n', df.dtypes)
+print('Missing values:\n', df.isnull().sum())
+
+# Clean inconsistent column names, text spaces and duplicate rows.
+df.columns = df.columns.str.strip()
+df = df.drop_duplicates()
+for col in df.select_dtypes(include=['object', 'string']).columns:
+    df[col] = df[col].astype('string').str.strip()
+    df[col] = df[col].replace('', pd.NA)
+
+# Missing values: numeric -> median; categories -> most frequent.
+for col in df.columns:
+    if pd.api.types.is_numeric_dtype(df[col]):
+        df[col] = df[col].fillna(df[col].median())
+    else:
+        mode = df[col].mode(dropna=True)
+        df[col] = df[col].fillna(mode.iloc[0] if len(mode) else 'Unknown')
+
+# Scan ALL numeric columns for outliers and cap by IQR boundaries.
+numeric = df.select_dtypes(include='number').columns
+for col in numeric:
+    q1, q3 = df[col].quantile([0.25, 0.75])
+    iqr = q3 - q1
+    low, high = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+    count = ((df[col] < low) | (df[col] > high)).sum()
+    print('Outliers in', col, ':', count)
+    if iqr > 0:
+        df[col] = df[col].clip(low, high)
+
+# Transform at least one numeric variable with standardization.
+if len(numeric):
+    col = numeric[0]
+    std = df[col].std()
+    df[col + '_scaled'] = (df[col] - df[col].mean()) / std if std > 0 else 0
+    print('Transformed column:', col + '_scaled')
+
+# Categorical -> quantitative (one-hot encoding).
+df = pd.get_dummies(df, dtype=int)
+print('Cleaned dataset:\n', df.head())
+print('Final shape:', df.shape)

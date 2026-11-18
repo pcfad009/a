@@ -1,0 +1,51 @@
+DATASET SURVIVAL GUIDE — READ BEFORE P7, P8, P9, P10 OR P11
+
+1. Place the CSV in the SAME folder as the Jupyter notebook; or use its full path.
+2. Load and inspect it:
+   import pandas as pd
+   df = pd.read_csv('exam.csv')
+   print(df.head())         # first 5 rows
+   print(df.columns)       # exact spelling of column names
+   print(df.shape)         # rows, columns
+   print(df.dtypes)        # number vs text
+   print(df.isnull().sum()) # missing values
+   print(df.describe())    # numeric statistics
+
+3. For a DIFFERENT CSV, first change FILE = 'exam.csv'.
+   For supervised programs (Linear, Logistic, SVM, KNN), ALSO change
+   TARGET = 'correct_answer_column'. Example: MEDV / Purchased / Prediction.
+   Regression needs a NUMBER target; classification needs CATEGORIES.
+   PCA and K-Means do NOT need a target column.
+
+4. If an input column contains TEXT categories, convert using pd.get_dummies().
+   For raw EMAIL TEXT with SVM, use sklearn.feature_extraction.text.TfidfVectorizer.
+   Some datasets require date parsing, dropping identifiers, and other cleaning.
+
+5. SCALING: KNN/SVM/Logistic usually benefit from StandardScaler.
+   For supervised learning, fit the scaler ONLY on X_train, then transform X_test.
+   Training and testing subsets must be kept separate to avoid leakage.
+
+6. P7 CHECKLIST EXACTLY FROM SYLLABUS:
+   imports; source URL/description; pandas load; initial stats;
+   missing values AND inconsistencies; numeric outliers;
+   transform a variable; encode categories as numbers.
+   Our P7 script covers these steps, but YOU must state the real source URL
+   when using the examiner's CSV. The script cannot infer its origin.
+
+7. P10B IRIS HAS THREE CLASSES. TP/FP/TN/FN are shown for each class,
+   treating that class as positive and the other two as negative.
+   Precision/recall use macro average.
+
+8. Some files intentionally use named exam datasets (HousingData.csv,
+   Social_Network_Ads.csv, emails.csv). These files aren't in this ZIP.
+   Keep the actual CSV next to the notebook or use the full file path.
+   Dataset-independent programs (chatbot, games) work without CSV.
+   PCA, K-Means, KNN have built-in Iris fallback for practice.
+
+9. RUNNING TXT CODE: open TXT; copy its contents into one Jupyter cell.
+   Do NOT run the ZIP itself. Ensure numpy, pandas, matplotlib,
+   scikit-learn are installed in the Jupyter Python environment.
+
+10. EXAM-PROOF WORKFLOW:
+   INSPECT -> CLEAN -> FEATURES/TARGET -> SPLIT -> TRAIN -> PREDICT -> METRICS.
+   (PCA/K-Means skip target, split and supervised metrics.)
